@@ -2,105 +2,158 @@ import streamlit as st
 import time
 from datetime import datetime
 
-# Page Configuration
-st.set_page_config(page_title="Success Stacker: Engineering Edition", page_icon="⚡", layout="wide")
+# 1. Page Configuration
+st.set_page_config(page_title="Success Stacker: Ultimate Master", page_icon="🏍️", layout="wide")
 
-# Initialize Session State
+# 2. State Management (Crucial for Approval Logic & Navigation)
 if 'task_step' not in st.session_state:
     st.session_state.task_step = 1
 if 'search_history' not in st.session_state:
     st.session_state.search_history = []
+if 'current_page' not in st.session_state:
+    st.session_state.current_page = "🏠 Master Day Plan"
 
-# Styling
+# 3. Enhanced Styling
 st.markdown("""
     <style>
-    .main { background-color: #0b0e14; color: #e0e0e0; }
-    .calc-box { background-color: #1e293b; padding: 20px; border-radius: 15px; border: 1px solid #38bdf8; }
-    .step-math { color: #fbbf24; font-family: monospace; font-size: 18px; }
-    .time-badge { background-color: #00c6ff; color: black; padding: 4px 10px; border-radius: 8px; font-weight: bold; }
+    .main { background-color: #0d1117; color: #c9d1d9; }
+    .stButton>button { background: linear-gradient(45deg, #238636, #2ea043); color: white; border-radius: 10px; width: 100%; border: none; font-weight: bold;}
+    .time-badge { background-color: #1f6feb; color: white; padding: 4px 12px; border-radius: 15px; font-weight: bold; font-family: monospace; }
+    .calc-box { background-color: #161b22; padding: 20px; border-radius: 12px; border: 1px solid #30363d; margin-top: 10px; }
+    .subject-card { background-color: #161b22; padding: 20px; border-radius: 15px; border-left: 5px solid #1f6feb; margin-bottom: 20px; }
+    .success-text { color: #238636; font-weight: bold; font-size: 20px; }
     </style>
     """, unsafe_allow_html=True)
 
-# --- SIDEBAR: SEARCH & HISTORY ---
-st.sidebar.title("🔍 Study Portal")
-doubt = st.sidebar.text_input("Doubt (e.g., KVL Calculation):")
+def navigate_to(page):
+    st.session_state.current_page = page
+
+# --- SIDEBAR: DOUBT HISTORY ---
+st.sidebar.title("🔍 Doubt History")
+doubt_input = st.sidebar.text_input("New Doubt (e.g. 'Linked List push')")
 if st.sidebar.button("Search & Save"):
-    if doubt:
-        url = f"https://www.google.com/search?q={doubt.replace(' ', '+')}+step+by+step+solution"
-        st.session_state.search_history.append({"query": doubt, "url": url})
-        st.sidebar.markdown(f"[View Solution]({url})")
+    if doubt_input:
+        link = f"https://www.google.com/search?q={doubt_input.replace(' ', '+')}+JNTU+notes"
+        st.session_state.search_history.append({"query": doubt_input, "url": link})
+        st.sidebar.markdown(f"[View Solution]({link})")
 
-# --- NAVIGATION ---
-menu = st.sidebar.radio("Go to:", ["🏠 Command Center", "🔢 Problem Solver (Math)", "📚 Subject Vault", "🏋️ Fitness & Moto"])
+st.sidebar.subheader("📜 Recent Doubts")
+for item in reversed(st.session_state.search_history[-5:]):
+    st.sidebar.markdown(f"• [{item['query']}]({item['url']})")
 
-# --- 1. COMMAND CENTER ---
-if menu == "🏠 Command Center":
-    st.title("⚡ Mission Sequence")
-    col1, col2 = st.columns([3, 1])
+menu = st.sidebar.radio("Main Menu", 
+    ["🏠 Master Day Plan", "📚 Subject Vault", "🛡️ Cyber Roadmap", "🔢 Problem Solver", "🏋️ Fitness & Moto"],
+    index=["🏠 Master Day Plan", "📚 Subject Vault", "🛡️ Cyber Roadmap", "🔢 Problem Solver", "🏋️ Fitness & Moto"].index(st.session_state.current_page))
+st.session_state.current_page = menu
+
+# --- PAGE 1: MASTER DAY PLAN (12-HOUR + ROADMAP BUTTONS) ---
+if st.session_state.current_page == "🏠 Master Day Plan":
+    st.title("⚡ Mission Control: srujith-glitch")
+    st.markdown("### Your 12-Hour Strategic Roadmap")
     
-    with col1:
-        st.markdown('<span class="time-badge">18:00 - 20:00</span> **Practice 5 BEE Numerical Problems**', unsafe_allow_html=True)
-    with col2:
-        if st.session_state.task_step == 1:
-            if st.button("APPROVE ✅"):
-                st.balloons()
-                st.success("Congratulations! Calculation skills leveled up.")
-                st.session_state.task_step += 1
-                time.sleep(1)
-                st.rerun()
-        else: st.write("✅ Task Finished")
+    # Clickable Roadmap
+    c1, c2, c3 = st.columns(3)
+    with c1: 
+        if st.button("06:00 AM - Fitness"): navigate_to("🏋️ Fitness & Moto"); st.rerun()
+    with c2: 
+        if st.button("06:00 PM - Core Study"): navigate_to("📚 Subject Vault"); st.rerun()
+    with c3: 
+        if st.button("09:00 PM - Cyber Sec"): navigate_to("🛡️ Cyber Roadmap"); st.rerun()
 
-# --- 2. PROBLEM SOLVER (THE CALCULATOR) ---
-elif menu == "🔢 Problem Solver (Math)":
-    st.title("⚡ BEE Numerical Solver")
-    st.write("Use this to verify your homework or practice problems.")
+    st.divider()
     
-    calc_type = st.selectbox("Select Calculation", ["Ohm's Law (V=IR)", "Electrical Power (P=VI)", "Series Resistance"])
+    # Sequential Locking Approval Section
+    st.subheader("Daily Task Approval")
     
-    st.markdown('<div class="calc-box">', unsafe_allow_html=True)
-    if calc_type == "Ohm's Law (V=IR)":
-        st.subheader("Ohm's Law Calculator")
-        i = st.number_input("Enter Current (I) in Amps", value=0.0)
-        r = st.number_input("Enter Resistance (R) in Ohms", value=0.0)
-        if st.button("Calculate Voltage"):
-            v = i * r
-            st.markdown(f"### Result: {v} Volts")
-            st.markdown(f"**Steps:**")
-            st.markdown(f'<p class="step-math">V = I × R</p>', unsafe_allow_html=True)
-            st.markdown(f'<p class="step-math">V = {i} × {r} = {v}V</p>', unsafe_allow_html=True)
+    # Task 1
+    t1, b1 = st.columns([3,1])
+    t1.markdown('<span class="time-badge">06:00 AM</span> **Fitness & Pushup Protocol**', unsafe_allow_html=True)
+    if st.session_state.task_step == 1:
+        if b1.button("APPROVE ✅", key="a1"):
+            st.balloons(); st.success("Congratulations! Body primed for the day."); st.session_state.task_step = 2; time.sleep(1); st.rerun()
+    elif st.session_state.task_step > 1: b1.write("✔️ COMPLETED")
 
-    elif calc_type == "Electrical Power (P=VI)":
-        st.subheader("Power Calculator")
-        v = st.number_input("Enter Voltage (V)", value=0.0)
-        i = st.number_input("Enter Current (I)", value=0.0)
-        if st.button("Calculate Power"):
-            p = v * i
-            st.markdown(f"### Result: {p} Watts")
-            st.markdown(f'<p class="step-math">P = V × I = {v} × {i} = {p}W</p>', unsafe_allow_html=True)
+    # Task 2
+    t2, b2 = st.columns([3,1])
+    t2.markdown('<span class="time-badge">06:00 PM</span> **BEE & DS Deep Dive (D-E-D-P)**', unsafe_allow_html=True)
+    if st.session_state.task_step < 2: b2.write("🔒 Locked")
+    elif st.session_state.task_step == 2:
+        if b2.button("APPROVE ✅", key="a2"):
+            st.balloons(); st.success("Congratulations! 9.0 CGPA getting closer."); st.session_state.task_step = 3; time.sleep(1); st.rerun()
+    else: b2.write("✔️ COMPLETED")
+
+# --- PAGE 2: SUBJECT VAULT (ALL SUBJECTS + MATERIAL) ---
+elif st.session_state.current_page == "📚 Subject Vault":
+    st.title("📖 Academic Vault")
+    sub = st.selectbox("Choose Subject", ["BEE", "DS", "Maths (ODVC)", "Chemistry", "Drawing"])
+    
+    st.markdown('<div class="subject-card">', unsafe_allow_html=True)
+    if sub == "BEE":
+        st.header("⚡ Basic Electrical Engineering")
+        st.write("**Topic:** Single Phase Transformer")
+        st.image("https://www.electrical4u.com/wp-content/uploads/ideal-transformer.png", caption="Exam-Critical Diagram", width=400)
+        st.latex(r"E = 4.44 \cdot f \cdot N \cdot \Phi_m")
+        st.write("Mid-2 Strategy: Mastering the D-E-D-P (Definition, Equation, Diagram, Points).")
+
+    elif sub == "DS":
+        st.header("💻 Data Structures: Linked Lists")
+        st.image("https://upload.wikimedia.org/wikipedia/commons/6/6d/Singly-linked-list.svg", caption="Singly Linked List Diagram", width=500)
+        st.write("Key Point: Practice 'Push' and 'Pop' logic for Stacks/Queues.")
+
+    elif sub == "Maths (ODVC)":
+        st.header("🔢 Maths (ODVC): Double Integration")
+        st.latex(r"\int_{x=a}^{b} \int_{y=g_1(x)}^{g_2(x)} f(x,y) \,dy \,dx")
+        st.write("Always draw the integration region R on the graph first!")
+
+    elif sub == "Chemistry":
+        st.header("🧪 Engineering Chemistry")
+        st.write("**Topic:** Water Technology & Batteries")
+        st.write("- Hardness calculations: EDTA method.")
+        st.write("- Li-ion Battery working & recharging.")
+
+    elif sub == "Drawing":
+        st.header("📐 Engineering Drawing")
+        st.image("https://upload.wikimedia.org/wikipedia/commons/4/4e/Orthographic_projection_example.png", caption="Orthographic Projection", width=450)
+        st.warning("Mid-2 Tip: Accuracy in First Angle Projection is vital.")
     st.markdown('</div>', unsafe_allow_html=True)
 
-# --- 3. SUBJECT VAULT (DIAGRAMS) ---
-elif menu == "📚 Subject Vault":
-    st.title("📖 D-E-D-P Master Section")
-    sub = st.selectbox("Select Subject", ["BEE", "Chemistry"])
-    
-    if sub == "BEE":
-        st.header("Topic: Single Phase Transformer")
-        st.write("**Definition:** A static device that transfers electrical energy from one circuit to another through electromagnetic induction.")
-        
-        st.subheader("Diagram Requirement")
-        st.info("⚠️ MUST DRAW: Core, Primary Winding, Secondary Winding, and Magnetic Flux Lines.")
-        # Visual Aid for student
-        st.image("https://upload.wikimedia.org/wikipedia/commons/thumb/4/43/Transformer_ideal.svg/1200px-Transformer_ideal.svg.png", width=400, caption="Core Diagram Reference")
-        
-        st.subheader("Equation")
-        st.latex(r"E = 4.44 \cdot f \cdot N \cdot \Phi_m")
-        st.write("Where f=frequency, N=number of turns, Φm=maximum flux.")
+# --- PAGE 3: CYBER ROADMAP ---
+elif st.session_state.current_page == "🛡️ Cyber Roadmap":
+    st.title("🛡️ Path to 1.5L: Cyber Security")
+    st.markdown('<span class="time-badge">09:00 PM - 10:30 PM</span>', unsafe_allow_html=True)
+    st.markdown("""
+    - **Step 1:** OSI Model Review (20 mins)
+    - **Step 2:** TryHackMe Intro Room (40 mins)
+    - **Step 3:** Linux Command Practice (30 mins)
+    """)
+    st.link_button("🚀 Launch TryHackMe", "https://tryhackme.com/dashboard")
 
-# --- 4. FITNESS & MOTO ---
-elif menu == "🏋️ Fitness & Moto":
-    st.title("🏍️ Goal: Yamaha FZ-X")
-    st.image("https://www.yamaha-motor-india.com/theme/v3/images/fzx/color/matte-copper.png", use_container_width=True)
-    st.markdown("### Process: 100kg → 80kg")
-    st.write("1. **Incline Pushups:** 3 Sets x 15 Reps")
-    st.write("2. **Squats:** 3 Sets x 20 Reps")
+# --- PAGE 4: PROBLEM SOLVER ---
+elif st.session_state.current_page == "🔢 Problem Solver":
+    st.title("🧮 Engineering Calculator")
+    calc = st.radio("Choose Problem", ["Ohm's Law", "Electrical Power"])
+    
+    st.markdown('<div class="calc-box">', unsafe_allow_html=True)
+    if calc == "Ohm's Law":
+        i = st.number_input("Enter Current (I)", value=1.0)
+        r = st.number_input("Enter Resistance (R)", value=1.0)
+        if st.button("Solve Step-by-Step"):
+            v = i * r
+            st.markdown(f"### Result: {v} Volts")
+            st.latex(r"V = I \times R")
+            st.latex(f"V = {i} \times {r} = {v}V")
+    st.markdown('</div>', unsafe_allow_html=True)
+
+# --- PAGE 5: FITNESS & MOTIVATION ---
+elif st.session_state.current_page == "🏋️ Fitness & Moto":
+    st.title("🏍️ Fitness Goal: The Yamaha FZ-X")
+    
+    # Motivation Image Added Here
+    st.image("https://raw.githubusercontent.com/srujith-glitch/main.py/main/fzx_motivation.png", caption="The Prize: Yamaha FZ-X Matte Black", use_container_width=True)
+    
+    st.markdown('<p class="success-text">Target: 80kg (Current: 100kg)</p>', unsafe_allow_html=True)
+    st.markdown('<span class="time-badge">06:00 AM - 07:00 AM</span>', unsafe_allow_html=True)
+    
+    with st.expander("Today's Exercise Process"):
+        st.write("1. **Incline Pushups:** 3 Sets x 15 Reps. Hands on bed, body straight.")
+        st.write("2. **Squats:** 3 Sets x 20 Reps. Heels flat, chest up.")
