@@ -1,159 +1,153 @@
 import streamlit as st
 import time
-from datetime import datetime
+import random
 
 # 1. Page Configuration
-st.set_page_config(page_title="Success Stacker: Ultimate Master", page_icon="🏍️", layout="wide")
+st.set_page_config(page_title="Success Stacker: Master OS", page_icon="🏆", layout="wide")
 
-# 2. State Management (Crucial for Approval Logic & Navigation)
-if 'task_step' not in st.session_state:
-    st.session_state.task_step = 1
-if 'search_history' not in st.session_state:
-    st.session_state.search_history = []
-if 'current_page' not in st.session_state:
-    st.session_state.current_page = "🏠 Master Day Plan"
+# 2. State Management (Prevents reset on clicks)
+if 'task_step' not in st.session_state: st.session_state.task_step = 1
+if 'search_history' not in st.session_state: st.session_state.search_history = []
+if 'current_page' not in st.session_state: st.session_state.current_page = "🏠 Command Center"
 
-# 3. Enhanced Styling
+# 3. High-Contrast Designer UI
 st.markdown("""
     <style>
-    .main { background-color: #0d1117; color: #c9d1d9; }
-    .stButton>button { background: linear-gradient(45deg, #238636, #2ea043); color: white; border-radius: 10px; width: 100%; border: none; font-weight: bold;}
-    .time-badge { background-color: #1f6feb; color: white; padding: 4px 12px; border-radius: 15px; font-weight: bold; font-family: monospace; }
-    .calc-box { background-color: #161b22; padding: 20px; border-radius: 12px; border: 1px solid #30363d; margin-top: 10px; }
-    .subject-card { background-color: #161b22; padding: 20px; border-radius: 15px; border-left: 5px solid #1f6feb; margin-bottom: 20px; }
-    .success-text { color: #238636; font-weight: bold; font-size: 20px; }
+    .main { background-color: #0d1117; color: #ffffff; }
+    img { filter: brightness(1.2) contrast(1.1); background-color: #ffffff; border-radius: 12px; padding: 10px; margin: 15px 0; border: 2px solid #30363d; }
+    .stButton>button { background: linear-gradient(90deg, #00d4ff, #0072ff); color: white; border-radius: 12px; font-weight: 800; border: none; transition: 0.3s; height: 3.5em; width: 100%; }
+    .stButton>button:hover { transform: translateY(-3px); box-shadow: 0px 8px 20px #00d4ff; }
+    .info-card { background: #161b22; border-left: 5px solid #238636; padding: 20px; border-radius: 12px; margin-bottom: 20px; border: 1px solid #30363d; }
+    .holiday-card { background: #1c2128; border-left: 5px solid #f1e05a; padding: 20px; border-radius: 12px; margin-bottom: 20px; }
+    .time-badge { background-color: #1f6feb; color: white; padding: 5px 15px; border-radius: 20px; font-weight: bold; font-family: monospace; }
     </style>
     """, unsafe_allow_html=True)
 
-def navigate_to(page):
-    st.session_state.current_page = page
+# --- SIDEBAR: HIDDEN DOUBT ENGINE ---
+with st.sidebar:
+    st.title("🛡️ Intelligence Hub")
+    menu = st.radio("Main Menu", [
+        "🏠 Command Center", 
+        "📅 Holiday/Weekend Planner",
+        "📂 Faculty Study Material", 
+        "📚 Syllabus Master (Drill)", 
+        "📝 Papers & Doubts", 
+        "🏋️ Fitness & Moto"
+    ])
+    st.divider()
+    with st.expander("🔍 Click to Resolve Doubt"):
+        dq = st.text_input("New Doubt (Private Search):")
+        if st.button("Archive Doubt"):
+            if dq:
+                l = f"https://www.google.com/search?q={dq.replace(' ', '+')}+notes+pdf"
+                st.session_state.search_history.append({"q": dq, "l": l})
+                st.success("Archived in Papers & Doubts!")
+    st.info("Current Mode: 12-Hour Strategic")
 
-# --- SIDEBAR: DOUBT HISTORY ---
-st.sidebar.title("🔍 Doubt History")
-doubt_input = st.sidebar.text_input("New Doubt (e.g. 'Linked List push')")
-if st.sidebar.button("Search & Save"):
-    if doubt_input:
-        link = f"https://www.google.com/search?q={doubt_input.replace(' ', '+')}+JNTU+notes"
-        st.session_state.search_history.append({"query": doubt_input, "url": link})
-        st.sidebar.markdown(f"[View Solution]({link})")
-
-st.sidebar.subheader("📜 Recent Doubts")
-for item in reversed(st.session_state.search_history[-5:]):
-    st.sidebar.markdown(f"• [{item['query']}]({item['url']})")
-
-menu = st.sidebar.radio("Main Menu", 
-    ["🏠 Master Day Plan", "📚 Subject Vault", "🛡️ Cyber Roadmap", "🔢 Problem Solver", "🏋️ Fitness & Moto"],
-    index=["🏠 Master Day Plan", "📚 Subject Vault", "🛡️ Cyber Roadmap", "🔢 Problem Solver", "🏋️ Fitness & Moto"].index(st.session_state.current_page))
-st.session_state.current_page = menu
-
-# --- PAGE 1: MASTER DAY PLAN (12-HOUR + ROADMAP BUTTONS) ---
-if st.session_state.current_page == "🏠 Master Day Plan":
-    st.title("⚡ Mission Control: srujith-glitch")
-    st.markdown("### Your 12-Hour Strategic Roadmap")
+# --- PAGE 1: COMMAND CENTER (REGULAR DAY) ---
+if menu == "🏠 Command Center":
+    st.title("🚀 Command Center: Regular Day")
     
-    # Clickable Roadmap
+    st.subheader("Your 12-Hour Strategic Roadmap")
     c1, c2, c3 = st.columns(3)
     with c1: 
-        if st.button("06:00 AM - Fitness"): navigate_to("🏋️ Fitness & Moto"); st.rerun()
+        if st.button("06:00 AM - Fitness"): st.session_state.current_page = "🏋️ Fitness & Moto"; st.rerun()
     with c2: 
-        if st.button("06:00 PM - Core Study"): navigate_to("📚 Subject Vault"); st.rerun()
+        if st.button("06:00 PM - Study"): st.session_state.current_page = "📂 Faculty Study Material"; st.rerun()
     with c3: 
-        if st.button("09:00 PM - Cyber Sec"): navigate_to("🛡️ Cyber Roadmap"); st.rerun()
+        if st.button("09:00 PM - Cyber"): st.session_state.current_page = "🛡️ Cyber Roadmap"; st.rerun()
 
     st.divider()
-    
-    # Sequential Locking Approval Section
-    st.subheader("Daily Task Approval")
-    
-    # Task 1
-    t1, b1 = st.columns([3,1])
-    t1.markdown('<span class="time-badge">06:00 AM</span> **Fitness & Pushup Protocol**', unsafe_allow_html=True)
+    st.subheader("Task Completion Flow")
     if st.session_state.task_step == 1:
-        if b1.button("APPROVE ✅", key="a1"):
-            st.balloons(); st.success("Congratulations! Body primed for the day."); st.session_state.task_step = 2; time.sleep(1); st.rerun()
-    elif st.session_state.task_step > 1: b1.write("✔️ COMPLETED")
-
-    # Task 2
-    t2, b2 = st.columns([3,1])
-    t2.markdown('<span class="time-badge">06:00 PM</span> **BEE & DS Deep Dive (D-E-D-P)**', unsafe_allow_html=True)
-    if st.session_state.task_step < 2: b2.write("🔒 Locked")
+        st.markdown('<div class="info-card">🕒 <b>06:00 AM</b>: Morning Mobility Protocol. Approve to unlock evening tasks.</div>', unsafe_allow_html=True)
+        if st.button("APPROVE COMPLETION ✅"): st.session_state.task_step = 2; st.rerun()
     elif st.session_state.task_step == 2:
-        if b2.button("APPROVE ✅", key="a2"):
-            st.balloons(); st.success("Congratulations! 9.0 CGPA getting closer."); st.session_state.task_step = 3; time.sleep(1); st.rerun()
-    else: b2.write("✔️ COMPLETED")
+        st.success("Morning Mission Complete!")
+        st.markdown('<div class="info-card">🕒 <b>06:00 PM</b>: Core Academic Session. Update your material vault.</div>', unsafe_allow_html=True)
+        if st.button("APPROVE COMPLETION ✅"): st.session_state.task_step = 3; st.rerun()
 
-# --- PAGE 2: SUBJECT VAULT (ALL SUBJECTS + MATERIAL) ---
-elif st.session_state.current_page == "📚 Subject Vault":
-    st.title("📖 Academic Vault")
-    sub = st.selectbox("Choose Subject", ["BEE", "DS", "Maths (ODVC)", "Chemistry", "Drawing"])
-    
-    st.markdown('<div class="subject-card">', unsafe_allow_html=True)
-    if sub == "BEE":
-        st.header("⚡ Basic Electrical Engineering")
-        st.write("**Topic:** Single Phase Transformer")
-        st.image("https://www.electrical4u.com/wp-content/uploads/ideal-transformer.png", caption="Exam-Critical Diagram", width=400)
-        st.latex(r"E = 4.44 \cdot f \cdot N \cdot \Phi_m")
-        st.write("Mid-2 Strategy: Mastering the D-E-D-P (Definition, Equation, Diagram, Points).")
-
-    elif sub == "DS":
-        st.header("💻 Data Structures: Linked Lists")
-        st.image("https://upload.wikimedia.org/wikipedia/commons/6/6d/Singly-linked-list.svg", caption="Singly Linked List Diagram", width=500)
-        st.write("Key Point: Practice 'Push' and 'Pop' logic for Stacks/Queues.")
-
-    elif sub == "Maths (ODVC)":
-        st.header("🔢 Maths (ODVC): Double Integration")
-        st.latex(r"\int_{x=a}^{b} \int_{y=g_1(x)}^{g_2(x)} f(x,y) \,dy \,dx")
-        st.write("Always draw the integration region R on the graph first!")
-
-    elif sub == "Chemistry":
-        st.header("🧪 Engineering Chemistry")
-        st.write("**Topic:** Water Technology & Batteries")
-        st.write("- Hardness calculations: EDTA method.")
-        st.write("- Li-ion Battery working & recharging.")
-
-    elif sub == "Drawing":
-        st.header("📐 Engineering Drawing")
-        st.image("https://upload.wikimedia.org/wikipedia/commons/4/4e/Orthographic_projection_example.png", caption="Orthographic Projection", width=450)
-        st.warning("Mid-2 Tip: Accuracy in First Angle Projection is vital.")
-    st.markdown('</div>', unsafe_allow_html=True)
-
-# --- PAGE 3: CYBER ROADMAP ---
-elif st.session_state.current_page == "🛡️ Cyber Roadmap":
-    st.title("🛡️ Path to 1.5L: Cyber Security")
-    st.markdown('<span class="time-badge">09:00 PM - 10:30 PM</span>', unsafe_allow_html=True)
+# --- PAGE 2: HOLIDAY/WEEKEND PLANNER ---
+elif menu == "📅 Holiday/Weekend Planner":
+    st.title("🏖️ Holiday Grind Plan")
+    st.subheader("Max Productivity Mode")
     st.markdown("""
-    - **Step 1:** OSI Model Review (20 mins)
-    - **Step 2:** TryHackMe Intro Room (40 mins)
-    - **Step 3:** Linux Command Practice (30 mins)
-    """)
-    st.link_button("🚀 Launch TryHackMe", "https://tryhackme.com/dashboard")
+    <div class="holiday-card">
+    <b>🌅 08:00 AM - 10:30 AM:</b> Deep Work - Solving Previous Papers<br>
+    <b>🏙️ 11:30 AM - 01:30 PM:</b> Cyber Security Labs (TryHackMe/Linux)<br>
+    <b>🌇 04:00 PM - 06:00 PM:</b> Extended Fitness (Outdoor Run/Gym)<br>
+    <b>🌃 08:00 PM - 10:00 PM:</b> Syllabus Master Random Drill Questions
+    </div>
+    """, unsafe_allow_html=True)
+    st.warning("Holiday Goal: Finish 1 Full Unit of BEE or Maths.")
 
-# --- PAGE 4: PROBLEM SOLVER ---
-elif st.session_state.current_page == "🔢 Problem Solver":
-    st.title("🧮 Engineering Calculator")
-    calc = st.radio("Choose Problem", ["Ohm's Law", "Electrical Power"])
+# --- PAGE 3: FACULTY STUDY MATERIAL (INDIVIDUAL SUBJECTS) ---
+elif menu == "📂 Faculty Study Material":
+    st.title("📂 Faculty Resource Hub")
+    st.info("Direct uploads and notes from your college professors.")
     
-    st.markdown('<div class="calc-box">', unsafe_allow_html=True)
-    if calc == "Ohm's Law":
-        i = st.number_input("Enter Current (I)", value=1.0)
-        r = st.number_input("Enter Resistance (R)", value=1.0)
-        if st.button("Solve Step-by-Step"):
-            v = i * r
-            st.markdown(f"### Result: {v} Volts")
-            st.latex(r"V = I \times R")
-            st.latex(f"V = {i} \times {r} = {v}V")
-    st.markdown('</div>', unsafe_allow_html=True)
+    tabs = st.tabs(["BEE", "DS", "Maths (ODVC)", "Chemistry", "Drawing"])
+    
+    with tabs[0]:
+        st.header("⚡ BEE Material")
+        st.markdown('<div class="info-card">', unsafe_allow_html=True)
+        st.write("**Unit 1: Transformers**")
+        st.image("https://www.electrical4u.com/wp-content/uploads/ideal-transformer.png", width=400)
+        
 
-# --- PAGE 5: FITNESS & MOTIVATION ---
-elif st.session_state.current_page == "🏋️ Fitness & Moto":
-    st.title("🏍️ Fitness Goal: The Yamaha FZ-X")
+[Image of a single phase transformer diagram]
+
+        st.latex(r"E = 4.44 \cdot f \cdot N \cdot \Phi_m")
+        st.write("• [Faculty Link: Mid-2 Question Bank](https://example.com)")
+        st.markdown('</div>', unsafe_allow_html=True)
+
+    with tabs[1]:
+        st.header("💻 Data Structures Material")
+        st.markdown('<div class="info-card">', unsafe_allow_html=True)
+        st.write("**Unit 2: Stacks & Queues**")
+        st.image("https://upload.wikimedia.org/wikipedia/commons/2/29/Data_stack.svg", width=300)
+        
+        st.write("Faculty Note: Understand the difference between LIFO and FIFO.")
+        st.markdown('</div>', unsafe_allow_html=True)
+
+    with tabs[2]:
+        st.header("🔢 Maths (ODVC) Material")
+        st.latex(r"\iint_R f(x,y) \,dA")
+        st.write("Faculty Strategy: Practice changing the order of integration.")
+
+# --- PAGE 4: SYLLABUS MASTER (UNIT DRILLS) ---
+elif menu == "📚 Syllabus Master (Drill)":
+    st.title("🎯 Complete Syllabus Coverage Drill")
+    target_sub = st.selectbox("Select Subject", ["BEE", "DS", "Maths"])
     
-    # Motivation Image Added Here
-    st.image("https://raw.githubusercontent.com/srujith-glitch/main.py/main/fzx_motivation.png", caption="The Prize: Yamaha FZ-X Matte Black", use_container_width=True)
+    if st.button("Generate Random Syllabus Question"):
+        q_bank = {
+            "BEE": ["Explain Transformer Losses.", "Derive DC Generator EMF Eq.", "Compare MC and MI Meters."],
+            "DS": ["Write Push/Pop Algorithm for Stacks.", "Explain Binary Search Tree insertion.", "Compare BFS vs DFS."],
+            "Maths": ["Solve Double Integral for y=x and y=x^2.", "State Gauss Divergence Theorem.", "Apply Green's Theorem."]
+        }
+        st.markdown(f'<div class="holiday-card" style="font-size: 20px;"><b>Question:</b> {random.choice(q_bank[target_sub])}</div>', unsafe_allow_html=True)
+
+# --- PAGE 5: PAPERS & DOUBTS (HIDDEN DATA) ---
+elif menu == "📝 Papers & Doubts":
+    st.title("📝 Exams & Saved Doubts")
+    tab_p, tab_d = st.tabs(["Previous Papers", "My Doubt Archive"])
     
-    st.markdown('<p class="success-text">Target: 80kg (Current: 100kg)</p>', unsafe_allow_html=True)
-    st.markdown('<span class="time-badge">06:00 AM - 07:00 AM</span>', unsafe_allow_html=True)
+    with tab_p:
+        st.link_button("JNTU FastUpdates: Previous Papers", "https://www.jntufastupdates.com/")
+        st.link_button("Search All Past Papers (Google)", "https://www.google.com/search?q=JNTU+Previous+Year+Question+Papers")
     
-    with st.expander("Today's Exercise Process"):
-        st.write("1. **Incline Pushups:** 3 Sets x 15 Reps. Hands on bed, body straight.")
-        st.write("2. **Squats:** 3 Sets x 20 Reps. Heels flat, chest up.")
+    with tab_d:
+        if not st.session_state.search_history:
+            st.write("No doubts saved yet. Use the sidebar to add some!")
+        for item in reversed(st.session_state.search_history):
+            st.markdown(f"❓ **{item['q']}** → [Solution Link]({item['l']})")
+
+# --- PAGE 6: FITNESS & MOTO ---
+elif menu == "🏋️ Fitness & Moto":
+    st.title("🏍️ Goal: Yamaha FZ-X")
+    try:
+        st.image("bike.png", use_container_width=True)
+    except:
+        st.image("https://www.yamaha-motor-india.com/theme/v3/images/fzx/color/matte-copper.png", use_container_width=True)
+    st.markdown('<div class="info-card"><b>Target:</b> 80kg Goal.<br><b>Process:</b> Incline Pushups, Squats, Planks.</div>', unsafe_allow_html=True)
