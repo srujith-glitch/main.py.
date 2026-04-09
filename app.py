@@ -1,144 +1,160 @@
 import streamlit as st
+import os
 import time
-import random
 
-# 1. Page Configuration & Layout
-st.set_page_config(page_title="srujith-glitch OS", page_icon="🚀", layout="wide")
+# --- 1. SERVER STORAGE & DIRECTORY ENGINE ---
+VAULT_ROOT = "srujith_vault"
+SECTIONS = ["Material Section", "Formula Section"]
+SUBJECTS = ["BEE", "Data Structures", "Maths (ODVC)", "Chemistry", "Drawing"]
 
-# 2. Advanced State Management for Persistence
-if 'task_step' not in st.session_state: st.session_state.task_step = 1
-if 'file_vault' not in st.session_state: st.session_state.file_vault = []
-if 'search_history' not in st.session_state: st.session_state.search_history = []
-if 'drill_state' not in st.session_state: st.session_state.drill_state = {"q": None, "k": None, "next": None, "show": False}
+# Ensure persistent folder structure exists on the server disk
+for sec in SECTIONS:
+    for sub in SUBJECTS:
+        path = os.path.join(VAULT_ROOT, sec.replace(" ", "_"), sub.replace(" ", "_"))
+        if not os.path.exists(path):
+            os.makedirs(path)
 
-# 3. High-Contrast Dark Theme UI
+def save_to_server(uploaded_file, section, subject):
+    target_dir = os.path.join(VAULT_ROOT, section.replace(" ", "_"), subject.replace(" ", "_"))
+    file_path = os.path.join(target_dir, uploaded_file.name)
+    with open(file_path, "wb") as f:
+        f.write(uploaded_file.getbuffer())
+    return file_path
+
+def list_server_files(section, subject):
+    target_dir = os.path.join(VAULT_ROOT, section.replace(" ", "_"), subject.replace(" ", "_"))
+    return os.listdir(target_dir) if os.path.exists(target_dir) else []
+
+# --- 2. GLOBAL UI & STYLING ---
+st.set_page_config(page_title="Control: srujith-glitch", layout="wide", page_icon="🛡️")
+
 st.markdown("""
     <style>
     .main { background-color: #0d1117; color: #ffffff; }
-    img { filter: brightness(1.2) contrast(1.1); border-radius: 12px; border: 2px solid #30363d; margin-bottom: 20px; }
-    .stButton>button { background: linear-gradient(90deg, #00d4ff, #0072ff); color: white; border-radius: 12px; font-weight: 800; border: none; height: 3.5em; width: 100%; transition: 0.3s; }
-    .stButton>button:hover { transform: translateY(-2px); box-shadow: 0px 5px 15px #00d4ff; }
+    .stButton>button { background: linear-gradient(90deg, #00d4ff, #0072ff); color: white; border-radius: 12px; font-weight: 800; border: none; height: 3.5em; width: 100%; }
     .info-card { background: #161b22; border-left: 5px solid #238636; padding: 20px; border-radius: 12px; margin-bottom: 20px; border: 1px solid #30363d; }
-    .formula-card { background: #0d1117; border: 1px solid #58a6ff; padding: 15px; border-radius: 10px; margin-bottom: 15px; text-align: center; }
-    .target-box { background-color: #1d3321; color: #4ade80; padding: 15px; border-radius: 10px; font-weight: bold; text-align: center; border: 1px solid #238636; margin-bottom: 20px;}
-    .drill-box { background: #1c2128; border: 2px solid #f1e05a; padding: 20px; border-radius: 15px; color: #f1e05a; font-weight: bold; }
+    .formula-box { background: #0d1117; border: 1px solid #58a6ff; padding: 15px; border-radius: 10px; margin-bottom: 15px; }
+    .section-header { color: #58a6ff; border-bottom: 1px solid #30363d; padding-bottom: 10px; margin-bottom: 20px; }
     </style>
     """, unsafe_allow_html=True)
 
-# --- SIDEBAR: NAVIGATION & PERMANENT VAULT ---
+# --- 3. SIDEBAR: NAVIGATION & GUIDED UPLOAD ---
 with st.sidebar:
     st.title("🛡️ Control Center")
-    menu = st.radio("Main Menu", [
-        "🏠 Master Day Plan", 
-        "🧪 Formula & Equations", 
-        "📂 Subject Vault", 
-        "🎯 Syllabus Drill", 
-        "📝 Exams & Archive",
-        "🏋️ Fitness & Moto"
-    ])
+    menu = st.radio("Main Menu", ["🏠 Master Day Plan", "🧪 Formula Vault", "📂 Academic Vault", "🎯 Syllabus Drill", "🏋️ Fitness & Moto"])
+    
     st.divider()
-    st.subheader("📥 Store to Vault")
-    new_file = st.file_uploader("Upload Notes/Answer Keys", type=["pdf", "png", "jpg", "jpeg"])
-    if new_file:
-        file_meta = {"name": new_file.name, "time": time.strftime("%H:%M:%S"), "size": new_file.size}
-        if file_meta not in st.session_state.file_vault:
-            st.session_state.file_vault.append(file_meta)
-            st.success(f"Archived: {new_file.name}")
+    st.subheader("📤 Guided Server Upload")
+    dest_sec = st.selectbox("1. Choose Section:", SECTIONS)
+    dest_sub = st.selectbox("2. Choose Subject:", SUBJECTS)
+    up_file = st.file_uploader("3. Select File:", type=["docx", "pdf", "png", "jpg", "jpeg"])
+    
+    if up_file and st.button("🚀 Push to Server"):
+        save_to_server(up_file, dest_sec, dest_sub)
+        st.success(f"Archived in {dest_sec} → {dest_sub}")
+        time.sleep(1)
+        st.rerun()
 
-# --- PAGE 1: MASTER DAY PLAN (12-HOUR ROADMAP) ---
+# --- 4. PAGE: MASTER DAY PLAN (12-HOUR ROADMAP) ---
 if menu == "🏠 Master Day Plan":
     st.title("🚀 Your 12-Hour Strategic Roadmap")
-    c1, c2, c3 = st.columns(3)
-    with c1: st.success("🌅 06:00 AM - Fitness Protocol")
-    with c2: st.info("📖 06:00 PM - Core Study (D-E-D-P)")
-    with c3: st.warning("🛡️ 09:00 PM - Cyber Sec Path")
+    st.markdown('<div class="info-card"><b>06:00 AM:</b> Fitness & Pushup Protocol<br><b>06:00 PM:</b> BEE & DS Deep Dive (D-E-D-P)<br><b>09:00 PM:</b> Cyber Sec Path</div>', unsafe_allow_html=True)
     
-    st.divider()
     st.subheader("Daily Task Approval")
-    if st.session_state.task_step == 1:
-        st.markdown('<div class="info-card">🕒 Pending: <b>06:00 AM Fitness & Pushup Protocol</b></div>', unsafe_allow_html=True)
-        if st.button("APPROVE COMPLETION ✅"): st.session_state.task_step = 2; st.rerun()
-    elif st.session_state.task_step == 2:
-        st.markdown('<div class="info-card" style="border-left-color: #58a6ff;">✅ COMPLETED: Morning Mobility<br>🕒 Pending: <b>06:00 PM BEE & DS Deep Dive</b></div>', unsafe_allow_html=True)
-        if st.button("APPROVE COMPLETION ✅"): st.session_state.task_step = 3; st.rerun()
-    else:
-        st.balloons()
-        st.success("All Daily Missions Completed!")
+    if st.checkbox("06:00 AM Protocol Completed"):
+        st.success("✅ Morning Mobility Finished")
+    if st.checkbox("06:00 PM Subject Study Completed"):
+        st.success("✅ Academic Deep Dive Finished")
 
-# --- PAGE 2: FORMULA & EQUATIONS ---
-elif menu == "🧪 Formula & Equations":
-    st.title("🧪 Formula & Equations Vault")
-    f_tabs = st.tabs(["BEE", "Maths (ODVC)", "Chemistry"])
-    with f_tabs[0]:
-        st.markdown('<div class="formula-card"><h4>Transformer EMF</h4>', unsafe_allow_html=True)
-        st.latex(r"E = 4.44 \cdot f \cdot N \cdot \Phi_m")
-        st.write("f=freq, N=turns, Φm=max flux")
-        st.markdown('</div>', unsafe_allow_html=True)
-    with f_tabs[1]:
-        st.markdown('<div class="formula-card"><h4>Gauss Divergence Theorem</h4>', unsafe_allow_html=True)
-        st.latex(r"\iiint_V (\nabla \cdot \mathbf{F}) \,dV = \iint_S (\mathbf{F} \cdot \mathbf{n}) \,dS")
-        st.markdown('</div>', unsafe_allow_html=True)
-
-# --- PAGE 3: SUBJECT VAULT (RESOURCES) ---
-elif menu == "📂 Subject Vault":
-    st.title("📂 Faculty Resource Hub")
-    s_tabs = st.tabs(["BEE", "DS", "Maths", "Chemistry", "Drawing"])
-    with s_tabs[0]: # BEE Details
-        st.header("⚡ BEE: Single Phase Transformer")
-        st.markdown('<div class="info-card"><b>Definition:</b> A static device that transfers electrical energy via electromagnetic induction.</div>', unsafe_allow_html=True)
-        st.error("⚠️ MUST DRAW: Core, Primary Winding, Secondary Winding, and Magnetic Flux Lines.")
-        st.image("https://www.electrical4u.com/wp-content/uploads/ideal-transformer.png", width=400)
+# --- 5. PAGE: FORMULA VAULT (Integrated from Word Files) ---
+elif menu == "🧪 Formula Vault":
+    st.title("🧪 Subject Formula Vault")
+    f_sub = st.selectbox("Select Subject Formulas:", SUBJECTS)
     
-    st.divider()
-    st.subheader("🗄️ Your Uploaded Reference Vault")
-    if not st.session_state.file_vault: st.info("Vault is empty. Upload in sidebar to refer later.")
-    else:
-        for f in st.session_state.file_vault:
-            st.markdown(f"📄 **{f['name']}** | Stored: {f['time']}")
-
-# --- PAGE 4: SYLLABUS DRILL (INTERACTIVE) ---
-elif menu == "🎯 Syllabus Drill":
-    st.title("🎯 Drill & Feedback Mode")
-    drill_data = {
-        "BEE": {"q": "Derive Transformer EMF Eq.", "k": "E = 4.44 f N Φm", "n": "Next: Efficiency & Losses"},
-        "DS": {"q": "Explain Stack Push/Pop Logic.", "k": "Push: Overflow check -> Top++ -> Insert", "n": "Next: Queue Operations"}
-    }
-    sub = st.selectbox("Select Subject", ["BEE", "DS"])
-    if st.button("Generate Random Question"):
-        st.session_state.drill_state = {"q": drill_data[sub]['q'], "k": drill_data[sub]['k'], "next": drill_data[sub]['n'], "show": False}
-
-    if st.session_state.drill_state["q"]:
-        st.markdown(f'<div class="drill-box">QUESTION: {st.session_state.drill_state["q"]}</div>', unsafe_allow_html=True)
-        u_ans = st.text_area("Type your solution to verify:")
-        if st.button("Verify & Show Key"): st.session_state.drill_state["show"] = True
+    st.markdown(f"<h3 class='section-header'>{f_sub} Reference Sheets</h3>", unsafe_allow_html=True)
+    
+    # Static Data from uploaded Word documents [cite: 1, 11, 23, 34]
+    if f_sub == "BEE":
+        st.markdown('<div class="formula-box">', unsafe_allow_html=True)
+        st.write("**Ohm’s Law:** $V = I R$ [cite: 36]")
+        st.write("**Power:** $P = V I = I^2 R = V^2 / R$ [cite: 38]")
+        st.write("**AC Impedance:** $Z = \sqrt{R^2 + (X_L - X_C)^2}$ [cite: 49]")
+        st.write("**Transformer EMF:** $E = 4.44 \cdot f \cdot N \cdot \Phi_m$ [cite: 55]")
+        st.markdown('</div>', unsafe_allow_html=True)
         
-        if st.session_state.drill_state["show"]:
-            st.success(f"✅ CORRECT KEY: {st.session_state.drill_state['k']}")
-            st.info(f"💡 RECOMMENDATION: {st.session_state.drill_state['next']}")
+    elif f_sub == "Data Structures":
+        st.markdown('<div class="formula-box">', unsafe_allow_html=True)
+        st.write("**Binary Search Complexity:** $\log_2 n$ [cite: 27]")
+        st.write("**Stack PUSH:** $Top = Top + 1$ [cite: 29]")
+        st.write("**AVL Balance Factor:** $BF = h_L - h_R$ [cite: 33]")
+        st.markdown('</div>', unsafe_allow_html=True)
 
-# --- PAGE 5: EXAMS & ARCHIVE ---
-elif menu == "📝 Exams & Archive":
-    st.title("📝 Exam Repository")
-    st.link_button("JNTU Previous Year Papers", "https://www.jntufastupdates.com/")
-    st.divider()
-    st.subheader("Mid-1 Papers & Keys")
-    # Pulls files from vault that mention 'mid'
-    mids = [f for f in st.session_state.file_vault if "mid" in f['name'].lower()]
-    if not mids: st.write("No Mid papers found in vault yet.")
-    for m in mids: st.write(f"✅ Stored: {m['name']}")
+    elif f_sub == "Maths (ODVC)":
+        st.markdown('<div class="formula-box">', unsafe_allow_html=True)
+        st.write("**Linear DE:** $dy/dx + P y = Q$ [cite: 13]")
+        st.write("**Vector Dot Product:** $A \cdot B = AB \cos\\theta$ [cite: 17]")
+        st.write("**Double Integration:** $\iint_R f(x,y) \,dy \,dx$ [cite: 22]")
+        st.markdown('</div>', unsafe_allow_html=True)
 
-# --- PAGE 6: FITNESS & MOTO ---
+    elif f_sub == "Chemistry":
+        st.markdown('<div class="formula-box">', unsafe_allow_html=True)
+        st.write("**Nernst Equation:** $E = E^\circ - (0.0591/n) \log Q$ [cite: 3]")
+        st.write("**Gibbs Free Energy:** $\Delta G = -nFE$ [cite: 6]")
+        st.markdown('</div>', unsafe_allow_html=True)
+
+    # Server Files for Formulas
+    uploaded_formulas = list_server_files("Formula_Section", f_sub)
+    if uploaded_formulas:
+        st.write("---")
+        st.subheader("📁 My Uploaded Formula Files")
+        for f in uploaded_formulas:
+            st.info(f"📄 {f}")
+
+# --- 6. PAGE: ACADEMIC VAULT (MATERIAL SECTION) ---
+elif menu == "📂 Academic Vault":
+    st.title("📂 Academic Resource Hub")
+    m_sub = st.selectbox("Select Subject Material:", SUBJECTS)
+    
+    st.markdown(f"<h3 class='section-header'>{m_sub} Faculty Material</h3>", unsafe_allow_html=True)
+    
+    if m_sub == "BEE":
+        st.write("**Topic:** Single Phase Transformer")
+        st.write("*Note:* Must draw Core and Windings for full marks.")
+    
+    uploaded_materials = list_server_files("Material_Section", m_sub)
+    if uploaded_materials:
+        for m in uploaded_materials:
+            st.success(f"📘 {m}")
+    else:
+        st.write("No files uploaded to this section yet.")
+
+# --- 7. PAGE: SYLLABUS DRILL ---
+elif menu == "🎯 Syllabus Drill":
+    st.title("🎯 Drill & Solution Verification")
+    drill_sub = st.selectbox("Subject for Drill:", ["BEE", "Data Structures"])
+    
+    if st.button("Generate Random Question"):
+        st.session_state.current_q = "Derive the EMF Equation of a Transformer." if drill_sub == "BEE" else "Write the algorithm for Stack PUSH."
+        st.session_state.show_drill_key = False
+
+    if "current_q" in st.session_state:
+        st.markdown(f'<div class="info-card"><b>QUESTION:</b> {st.session_state.current_q}</div>', unsafe_allow_html=True)
+        st.text_area("Type your solution here:")
+        
+        if st.button("Verify Answer"):
+            st.session_state.show_drill_key = True
+        
+        if st.session_state.show_drill_key:
+            key_text = "E = 4.44 * f * N * Φm" if drill_sub == "BEE" else "Check Overflow -> Top++ -> Insert"
+            st.warning(f"✅ ANSWER KEY: {key_text}")
+            st.info("💡 NEXT TOPIC: Efficiency & Losses" if drill_sub == "BEE" else "💡 NEXT TOPIC: Queue Operations")
+
+# --- 8. PAGE: FITNESS & MOTO ---
 elif menu == "🏋️ Fitness & Moto":
     st.title("🏍️ Goal: Yamaha FZ-X")
-    st.markdown('<div class="target-box">Target: 80kg Goal Motivation</div>', unsafe_allow_html=True)
-    try: st.image("bike.png", use_container_width=True)
-    except: st.image("https://www.yamaha-motor-india.com/theme/v3/images/fzx/color/matte-copper.png", use_container_width=True)
+    st.markdown('<div class="info-card">Target: 80kg Goal Motivation</div>', unsafe_allow_html=True)
+    st.write("**80kg Protocol:** 3x15 Pushups | 3x20 Squats | 60s Planks")
     
-    st.subheader("📋 Routine Guide")
-    st.markdown("""
-    <div class="info-card">
-    1. Incline Pushups: 3 Sets x 15 Reps<br>
-    2. Bodyweight Squats: 3 Sets x 20 Reps<br>
-    3. Plank Stability: 3 Reps x 60 Seconds
-    </div>
-    """, unsafe_allow_html=True)
+    fit_files = list_server_files("Material_Section", "Drawing") # Using Drawing folder as a placeholder or Fitness if created
+    for f in fit_files:
+        st.write(f"🏋️ {f}")
