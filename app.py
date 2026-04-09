@@ -5,6 +5,7 @@ import json
 from datetime import datetime, timedelta
 from pathlib import Path
 import hashlib
+import random
 
 # =============================================================================
 # 🚀 SRUJITH-GLITCH OS v3.0 - PROFESSIONAL ACADEMIC COMMAND CENTER
@@ -71,7 +72,7 @@ class SrujithVaultOS:
         analytics[section_key][subject].append({
             "file": filename,
             "timestamp": datetime.now().isoformat(),
-            "size": 0  # Could calculate actual size
+            "size": len(filename)  # Simplified size tracking
         })
         
         self.save_json(metadata_path, analytics)
@@ -100,6 +101,45 @@ class SrujithVaultOS:
 
 # Initialize OS
 os_system = SrujithVaultOS()
+
+# =============================================================================
+# 📊 ACADEMIC DATA SYSTEM
+# =============================================================================
+ACADEMIC_BENCHMARKS = {
+    "BEE": {
+        "formulas": [
+            {"title": "Transformer EMF", "formula": "E = 4.44 f N Φ_m", "ref": "Page 36"},
+            {"title": "Power", "formula": "P = VI = I²R = V²/R", "ref": "Page 38"},
+            {"title": "Impedance", "formula": "Z = √(R² + (X_L - X_C)²)", "ref": "Page 49"}
+        ],
+        "drill_questions": [
+            {"q": "Derive Transformer EMF Equation", "answer": "E = 4.44 f N Φ_m"},
+            {"q": "Power dissipation in resistor", "answer": "P = I²R"}
+        ]
+    },
+    "Data Structures": {
+        "formulas": [
+            {"title": "Binary Search", "formula": "O(log n)", "ref": "Page 27"},
+            {"title": "AVL Balance", "formula": "BF = h_L - h_R", "ref": "Page 33"}
+        ],
+        "drill_questions": [
+            {"q": "Stack PUSH algorithm", "answer": "Check overflow → Top++ → Insert"},
+            {"q": "Binary Search complexity", "answer": "O(log n)"}
+        ]
+    },
+    "Maths (ODVC)": {
+        "formulas": [
+            {"title": "Linear DE", "formula": "dy/dx + Py = Q", "ref": "Page 13"},
+            {"title": "Dot Product", "formula": "A·B = AB cosθ", "ref": "Page 17"}
+        ]
+    },
+    "Chemistry": {
+        "formulas": [
+            {"title": "Nernst Equation", "formula": "E = E° - (0.0591/n)logQ", "ref": "Page 3"},
+            {"title": "Gibbs Energy", "formula": "ΔG = -nFE", "ref": "Page 6"}
+        ]
+    }
+}
 
 # =============================================================================
 # 🎨 PROFESSIONAL UI SYSTEM
@@ -211,104 +251,26 @@ def init_professional_ui():
     """, unsafe_allow_html=True)
 
 # =============================================================================
-# 📊 ACADEMIC DATA SYSTEM
+# 📈 ANALYTICS DASHBOARD
 # =============================================================================
-ACADEMIC_BENCHMARKS = {
-    "BEE": {
-        "formulas": [
-            {"title": "Transformer EMF", "formula": "E = 4.44 f N Φ_m", "ref": "Page 36"},
-            {"title": "Power", "formula": "P = VI = I²R = V²/R", "ref": "Page 38"},
-            {"title": "Impedance", "formula": "Z = √(R² + (X_L - X_C)²)", "ref": "Page 49"}
-        ],
-        "drill_questions": [
-            {"q": "Derive Transformer EMF Equation", "answer": "E = 4.44 f N Φ_m"},
-            {"q": "Power dissipation in resistor", "answer": "P = I²R"}
-        ]
-    },
-    "Data Structures": {
-        "formulas": [
-            {"title": "Binary Search", "formula": "O(log n)", "ref": "Page 27"},
-            {"title": "AVL Balance", "formula": "BF = h_L - h_R", "ref": "Page 33"}
-        ],
-        "drill_questions": [
-            {"q": "Stack PUSH algorithm", "answer": "Check overflow → Top++ → Insert"},
-            {"q": "Binary Search complexity", "answer": "O(log n)"}
-        ]
-    },
-    "Maths (ODVC)": {
-        "formulas": [
-            {"title": "Linear DE", "formula": "dy/dx + Py = Q", "ref": "Page 13"},
-            {"title": "Dot Product", "formula": "A·B = AB cosθ", "ref": "Page 17"}
-        ]
-    },
-    "Chemistry": {
-        "formulas": [
-            {"title": "Nernst Equation", "formula": "E = E° - (0.0591/n)logQ", "ref": "Page 3"},
-            {"title": "Gibbs Energy", "formula": "ΔG = -nFE", "ref": "Page 6"}
-        ]
-    }
-}
+def analytics_dashboard():
+    st.markdown('<h2 class="section-header">📊 Vault Analytics</h2>', unsafe_allow_html=True)
+    
+    analytics = os_system.load_json(Path(os_system.VAULT_ROOT) / "metadata" / "analytics.json")
+    
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        total_files = sum(len(files) for section in analytics.values() for files in section.values())
+        st.metric("💾 Total Files", total_files)
+    
+    with col2:
+        unique_subjects = len(set(subject for section in analytics.values() for subject in section.keys()))
+        st.metric("📚 Active Subjects", unique_subjects)
 
 # =============================================================================
-# 🎯 MAIN APPLICATION
+# 🎯 MAIN PAGES
 # =============================================================================
-def main():
-    init_professional_ui()
-    
-    # Header
-    st.markdown("""
-    <div style='text-align: center; margin-bottom: 3rem;'>
-        <h1 style='font-size: 3rem; margin-bottom: 0.5rem;'>🛡️ Srujith-Glitch OS v3.0</h1>
-        <p style='color: #8b949e; font-size: 1.2rem;'>JNTU Academic Command Center | 12-Hour Strategic Roadmap</p>
-    </div>
-    """, unsafe_allow_html=True)
-    
-    # Sidebar: Professional Control Panel
-    with st.sidebar:
-        st.markdown("""
-        <div style='text-align: center; padding: 1rem; border-bottom: 1px solid #30363d;'>
-            <h3 style='color: #00d4ff; margin: 0;'>🚀 Control Panel</h3>
-        </div>
-        """, unsafe_allow_html=True)
-        
-        menu = st.radio("📋 Navigation", [
-            "🏠 Master Day Plan", 
-            "🧪 Formula Vault", 
-            "📚 Academic Vault", 
-            "🎯 Syllabus Drill", 
-            "🏋️ Fitness & Moto",
-            "📊 Analytics"
-        ], label_visibility="collapsed")
-        
-        st.divider()
-        st.markdown("### 📤 Vault Upload")
-        
-        dest_sec = st.selectbox("Section:", os_system.SECTIONS)
-        dest_sub = st.selectbox("Subject:", os_system.SUBJECTS)
-        up_file = st.file_uploader("Upload File", type=["pdf", "docx", "png", "jpg"])
-        
-        if up_file and st.button("🚀 Archive to Vault", use_container_width=True):
-            with st.spinner("Securing file to vault..."):
-                file_path = os_system.save_to_vault(up_file, dest_sec, dest_sub)
-                st.success(f"✅ Archived: {Path(file_path).name}")
-                st.balloons()
-                time.sleep(1)
-                st.rerun()
-    
-    # Main Pages
-    if menu == "🏠 Master Day Plan":
-        master_day_plan()
-    elif menu == "🧪 Formula Vault":
-        formula_vault()
-    elif menu == "📚 Academic Vault":
-        academic_vault()
-    elif menu == "🎯 Syllabus Drill":
-        syllabus_drill()
-    elif menu == "🏋️ Fitness & Moto":
-        fitness_moto()
-    elif menu == "📊 Analytics":
-        analytics_dashboard()
-
 def master_day_plan():
     st.markdown('<h2 class="section-header">🚀 12-Hour Strategic Roadmap</h2>', unsafe_allow_html=True)
     
@@ -352,7 +314,7 @@ def formula_vault():
     # Academic Benchmarks
     st.markdown(f'<h3 style="color: #58a6ff;">📖 {f_sub} Core Formulas</h3>', unsafe_allow_html=True)
     
-    if f_sub in ACADEMIC_BENCHMARKS and ACADEMIC_BENCHMARKS[f_sub]["formulas"]:
+    if f_sub in ACADEMIC_BENCHMARKS and ACADEMIC_BENCHMARKS[f_sub].get("formulas"):
         for formula in ACADEMIC_BENCHMARKS[f_sub]["formulas"]:
             st.markdown(f"""
             <div class="formula-card">
@@ -391,8 +353,7 @@ def syllabus_drill():
     drill_sub = st.selectbox("Subject:", ["BEE", "Data Structures"])
     
     if st.button("🎲 Generate Drill Question", use_container_width=True):
-        if drill_sub in ACADEMIC_BENCHMARKS:
-            import random
+        if drill_sub in ACADEMIC_BENCHMARKS and ACADEMIC_BENCHMARKS[drill_sub].get("drill_questions"):
             q_data = random.choice(ACADEMIC_BENCHMARKS[drill_sub]["drill_questions"])
             st.session_state.current_drill = q_data
             st.session_state.show_answer = False
@@ -410,8 +371,39 @@ def syllabus_drill():
         
         user_answer = st.text_area("💭 Your Solution:", height=120)
         
-        if st.button("✅ Verify Answer", use_container_width=True):
-            st.session_state.show_answer = True
-            st.rerun()
+        col1, col2 = st.columns([3,1])
+        with col2:
+            if st.button("✅ Verify Answer", use_container_width=True):
+                st.session_state.show_answer = True
+                st.rerun()
         
-        if st.session_state
+        if st.session_state.get("show_answer", False):
+            st.markdown(f"""
+            <div class="metric-card" style='background: linear-gradient(135deg, rgba(34,134,54,0.2), rgba(88,166,255,0.1)); 
+                     border-left: 5px solid #238636;'>
+                <h3 style='color: #238636; margin-bottom: 1rem;'>✅ ANSWER KEY</h3>
+                <div style='font-size: 1.2rem; font-family: monospace; color: #ffffff; font-weight: 500;'>
+                    {st.session_state.current_drill['answer']}
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
+            
+            st.success("💡 Next Topic: Review related concepts and practice variations!")
+
+def fitness_moto():
+    st.markdown('<h2 class="section-header">🏋️ Fitness & Motivation</h2>', unsafe_allow_html=True)
+    
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        st.markdown("""
+        <div class="metric-card">
+            <h3 style='color: #f85149; margin: 0;'>🎯 TARGET</h3>
+            <h2 style='color: #00d4ff; margin: 0.5rem 0;'>80kg</h2>
+            <p style='color: #8b949e;'>Yamaha FZ-X Reward</p>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        st.markdown("""
+        ### 💪 Daily Protocol
+        - **3x15
