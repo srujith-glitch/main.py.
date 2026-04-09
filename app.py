@@ -1,106 +1,106 @@
 import streamlit as st
-import requests
-import pandas as pd
+import time
 from datetime import datetime
 
 # Page Configuration
-st.set_page_config(page_title="Success Stacker Ultimate", page_icon="🌐", layout="wide")
+st.set_page_config(page_title="Success Stacker: Engineering Edition", page_icon="⚡", layout="wide")
 
-# Styling for a clean, non-boring look
+# Initialize Session State
+if 'task_step' not in st.session_state:
+    st.session_state.task_step = 1
+if 'search_history' not in st.session_state:
+    st.session_state.search_history = []
+
+# Styling
 st.markdown("""
     <style>
     .main { background-color: #0b0e14; color: #e0e0e0; }
-    .stButton>button { background: linear-gradient(45deg, #00c6ff, #0072ff); color: white; border: none; }
-    .resource-card { background-color: #1a1f29; padding: 15px; border-radius: 10px; border-left: 5px solid #00c6ff; margin-bottom: 10px; }
-    .alert-card { background-color: #2d1b1b; padding: 15px; border-radius: 10px; border-left: 5px solid #ff4b4b; }
+    .calc-box { background-color: #1e293b; padding: 20px; border-radius: 15px; border: 1px solid #38bdf8; }
+    .step-math { color: #fbbf24; font-family: monospace; font-size: 18px; }
+    .time-badge { background-color: #00c6ff; color: black; padding: 4px 10px; border-radius: 8px; font-weight: bold; }
     </style>
     """, unsafe_allow_html=True)
 
-# --- 1. INTERNET SYNC FUNCTIONS ---
-def get_live_market():
-    # Example: Tracking Bitcoin as a proxy for your 1.5L tech goal
-    try:
-        res = requests.get("https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=inr")
-        return res.json()['bitcoin']['inr']
-    except: return "Check Connection"
+# --- SIDEBAR: SEARCH & HISTORY ---
+st.sidebar.title("🔍 Study Portal")
+doubt = st.sidebar.text_input("Doubt (e.g., KVL Calculation):")
+if st.sidebar.button("Search & Save"):
+    if doubt:
+        url = f"https://www.google.com/search?q={doubt.replace(' ', '+')}+step+by+step+solution"
+        st.session_state.search_history.append({"query": doubt, "url": url})
+        st.sidebar.markdown(f"[View Solution]({url})")
 
-# --- 2. SIDEBAR NAVIGATION ---
-st.sidebar.title("🎯 Stacker Menu")
-app_mode = st.sidebar.selectbox("Go to:", ["Dashboard", "80kg Fitness Program", "Exam & Answer Vault", "Cyber Security & AI"])
+# --- NAVIGATION ---
+menu = st.sidebar.radio("Go to:", ["🏠 Command Center", "🔢 Problem Solver (Math)", "📚 Subject Vault", "🏋️ Fitness & Moto"])
 
-# --- 3. DASHBOARD SECTION ---
-if app_mode == "Dashboard":
-    st.title("🚀 Your Daily Mission")
-    col1, col2 = st.columns([2, 1])
+# --- 1. COMMAND CENTER ---
+if menu == "🏠 Command Center":
+    st.title("⚡ Mission Sequence")
+    col1, col2 = st.columns([3, 1])
     
     with col1:
-        st.subheader("Live Goal Tracking")
-        st.write(f"**Current Bitcoin Price:** ₹{get_live_market()}")
-        st.info("💡 Keep an eye on the market—this is your 1.5L bike motivation!")
+        st.markdown('<span class="time-badge">18:00 - 20:00</span> **Practice 5 BEE Numerical Problems**', unsafe_allow_html=True)
+    with col2:
+        if st.session_state.task_step == 1:
+            if st.button("APPROVE ✅"):
+                st.balloons()
+                st.success("Congratulations! Calculation skills leveled up.")
+                st.session_state.task_step += 1
+                time.sleep(1)
+                st.rerun()
+        else: st.write("✅ Task Finished")
+
+# --- 2. PROBLEM SOLVER (THE CALCULATOR) ---
+elif menu == "🔢 Problem Solver (Math)":
+    st.title("⚡ BEE Numerical Solver")
+    st.write("Use this to verify your homework or practice problems.")
+    
+    calc_type = st.selectbox("Select Calculation", ["Ohm's Law (V=IR)", "Electrical Power (P=VI)", "Series Resistance"])
+    
+    st.markdown('<div class="calc-box">', unsafe_allow_html=True)
+    if calc_type == "Ohm's Law (V=IR)":
+        st.subheader("Ohm's Law Calculator")
+        i = st.number_input("Enter Current (I) in Amps", value=0.0)
+        r = st.number_input("Enter Resistance (R) in Ohms", value=0.0)
+        if st.button("Calculate Voltage"):
+            v = i * r
+            st.markdown(f"### Result: {v} Volts")
+            st.markdown(f"**Steps:**")
+            st.markdown(f'<p class="step-math">V = I × R</p>', unsafe_allow_html=True)
+            st.markdown(f'<p class="step-math">V = {i} × {r} = {v}V</p>', unsafe_allow_html=True)
+
+    elif calc_type == "Electrical Power (P=VI)":
+        st.subheader("Power Calculator")
+        v = st.number_input("Enter Voltage (V)", value=0.0)
+        i = st.number_input("Enter Current (I)", value=0.0)
+        if st.button("Calculate Power"):
+            p = v * i
+            st.markdown(f"### Result: {p} Watts")
+            st.markdown(f'<p class="step-math">P = V × I = {v} × {i} = {p}W</p>', unsafe_allow_html=True)
+    st.markdown('</div>', unsafe_allow_html=True)
+
+# --- 3. SUBJECT VAULT (DIAGRAMS) ---
+elif menu == "📚 Subject Vault":
+    st.title("📖 D-E-D-P Master Section")
+    sub = st.selectbox("Select Subject", ["BEE", "Chemistry"])
+    
+    if sub == "BEE":
+        st.header("Topic: Single Phase Transformer")
+        st.write("**Definition:** A static device that transfers electrical energy from one circuit to another through electromagnetic induction.")
         
-        st.subheader("Daily Non-Negotiables")
-        st.checkbox("🌅 Hostel Workout (No Equipment)")
-        st.checkbox("📖 1-3-7 Revision (Day 1, 3, or 7 logic)")
-        st.checkbox("📘 Reading 'How to Win Friends'")
+        st.subheader("Diagram Requirement")
+        st.info("⚠️ MUST DRAW: Core, Primary Winding, Secondary Winding, and Magnetic Flux Lines.")
+        # Visual Aid for student
+        st.image("https://upload.wikimedia.org/wikipedia/commons/thumb/4/43/Transformer_ideal.svg/1200px-Transformer_ideal.svg.png", width=400, caption="Core Diagram Reference")
+        
+        st.subheader("Equation")
+        st.latex(r"E = 4.44 \cdot f \cdot N \cdot \Phi_m")
+        st.write("Where f=frequency, N=number of turns, Φm=maximum flux.")
 
-    with col2:
-        st.markdown('<div class="alert-card">', unsafe_allow_html=True)
-        st.subheader("⚠️ Exam Focus")
-        st.write("Mid-1 Recap:")
-        st.write("- BEE: 8/25 (Needs Diagrams)")
-        st.write("- Chemistry: 14/25 (Needs Eqns)")
-        st.markdown('</div>', unsafe_allow_html=True)
-
-# --- 4. 80KG FITNESS PROGRAM ---
-elif app_mode == "80kg Fitness Program":
-    st.title("⚖️ Path to 80kg")
-    
-    # Weight Progress
-    weight = st.slider("Current Weight (kg)", 80, 120, 105)
-    st.progress((120 - weight) / (120 - 80))
-    st.write(f"You are **{weight - 80}kg** away from your goal!")
-
-    # Dynamic Exercise Library
-    day = datetime.now().strftime("%A")
-    st.subheader(f"Today's Routine: {day}")
-    
-    with st.expander("Show Exercise Instructions"):
-        if day in ["Monday", "Wednesday", "Friday"]:
-            st.write("1. **Incline Push-ups:** 3 sets of 15 (Hands on bed)")
-            st.write("2. **Backpack Squats:** 3 sets of 20 (Fill bag with books)")
-            st.write("3. **Wall Sits:** 3 sets of 45 seconds")
-        else:
-            st.write("1. **Burpees:** 3 sets of 10")
-            st.write("2. **Plank:** 3 sets of 1 minute")
-            st.write("3. **Walking:** 30 minutes around hostel campus")
-
-# --- 5. EXAM & ANSWER VAULT ---
-elif app_mode == "Exam & Answer Vault":
-    st.title("📚 JNTU Resources & D-E-D-P Answers")
-    
-    st.subheader("Quick Links (Updates via Internet)")
-    st.markdown('''
-    <div class="resource-card">
-        <a href="https://www.jntufastupdates.com/" target="_blank">🔗 JNTU Official Question Banks</a><br>
-        <a href="https://www.youtube.com/results?search_query=bee+thevenin+theorem+simplified" target="_blank">🎥 BEE Video Tutorials</a>
-    </div>
-    ''', unsafe_allow_html=True)
-
-    # D-E-D-P Material Template
-    st.subheader("Create a D-E-D-P Note")
-    topic = st.text_input("Topic Name")
-    col1, col2 = st.columns(2)
-    with col1:
-        st.text_area("Definition")
-        st.text_area("Equations")
-    with col2:
-        st.file_uploader("Upload Diagram Photo")
-        st.text_area("Key Points (Bullets)")
-
-# --- 6. CYBER SECURITY & AI ---
-elif app_mode == "Cyber Security & AI":
-    st.title("🛡️ The 'Stacker' Career Path")
-    st.info("Focusing on these skills is how you earn the 1.5L.")
-    st.write("1. **Linux Basics:** Essential for Cyber Sec.")
-    st.write("2. **Python Automation:** Use your Python skills to automate security tasks.")
-    st.write("3. **AI Prompting:** Use AI to explain complex DS code.")
+# --- 4. FITNESS & MOTO ---
+elif menu == "🏋️ Fitness & Moto":
+    st.title("🏍️ Goal: Yamaha FZ-X")
+    st.image("https://www.yamaha-motor-india.com/theme/v3/images/fzx/color/matte-copper.png", use_container_width=True)
+    st.markdown("### Process: 100kg → 80kg")
+    st.write("1. **Incline Pushups:** 3 Sets x 15 Reps")
+    st.write("2. **Squats:** 3 Sets x 20 Reps")
