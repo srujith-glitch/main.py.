@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Sujji Master Plan | Study Vault</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <header class="app-header">
+        <h1>Sujji's Study Vault</h1>
+        <p id="current-date"></p>
+    </header>
+
+    <nav class="nav-scroll">
+        <button class="nav-item active" onclick="showTab('marks')">Marks</button>
+        <button class="nav-item" onclick="showTab('today')">Today</button>
+        <button class="nav-item" onclick="showTab('tracker')">Syllabus</button>
+        <button class="nav-item" onclick="showTab('cyber')">Cyber</button>
+        <button class="nav-item" onclick="showTab('gym')">Gym</button>
+    </nav>
+
+    <main id="app-content">
+        </main>
+
+    <div class="fab-container">
+        <button class="fab" onclick="openUploadModal()">+</button>
+    </div>
+
+    <div id="upload-modal" class="modal">
+        <div class="modal-content">
+            <h3>Add to Vault</h3>
+            <p>Select category and subject to upload materials.</p>
+            <select id="doc-type">
+                <option value="material">Study Material</option>
+                <option value="formula">Formula Section</option>
+            </select>
+            <select id="subject-list">
+                <option>Maths</option>
+                <option>BEE</option>
+                <option>Chemistry</option>
+                <option>DS</option>
+                <option>Drawing</option>
+            </select>
+            <input type="file" id="file-input">
+            <div class="modal-actions">
+                <button onclick="closeModal()">Cancel</button>
+                <button class="btn-primary" onclick="saveToVault()">Upload</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
